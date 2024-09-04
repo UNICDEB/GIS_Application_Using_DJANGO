@@ -1,0 +1,173 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Interactive Map with Line of Sight</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.30/"></script>
+
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        #container {
+            width: 80%;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #viewDiv {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+        }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+
+        #controls input, #controls button {
+            margin-right: 10px;
+            padding: 8px;
+        }
+
+        #losWidget {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="controls">
+            <input type="text" id="latitude" placeholder="Enter latitude">
+            <input type="text" id="longitude" placeholder="Enter longitude">
+            <button onclick="markLocation()">Mark Location</button>
+        </div>
+
+        <div id="viewDiv"></div>
+    </div>
+
+    {% load static %}
+    <script src="{% static 'js/arc_map.js' %}"></script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoServer WMS with Leaflet - Full Characteristics</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([51.505, -0.09], 5);  // Default center and zoom level
+
+    // Add a base layer (optional)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add GeoServer WMS layer with additional characteristics
+    var geoServerWMS = L.tileLayer.wms('http://localhost:8080/geoserver/wms', {
+        layers: 'workspace:layer_name',  // Replace with your workspace and layer name
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.1',  // Specify WMS version
+        tiled: true,  // Enable tiling for better performance
+        attribution: '© GeoServer',
+        styles: 'default',  // Apply the default style or specify your custom style
+        bboxSR: 4326,  // Specify the spatial reference system for bounding boxes
+        crs: L.CRS.EPSG4326,  // Coordinate Reference System (CRS)
+        detectRetina: true,  // Use retina tiles if available
+        zIndex: 100  // Control stacking order of the layers
+    }).addTo(map);
+
+    // Optionally, add multiple WMS layers with different characteristics
+    var anotherWMSLayer = L.tileLayer.wms('http://localhost:8080/geoserver/wms', {
+        layers: 'workspace:another_layer',  // Replace with another layer name
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.1',
+        styles: 'another_style',  // Use another custom style
+        zIndex: 200  // Higher z-index to place above other layers
+    }).addTo(map);
+
+    // Add a WMS GetFeatureInfo request to display information about map features
+    map.on('click', function(e) {
+        var url = getFeatureInfoUrl(
+            map, geoServerWMS, e.latlng, map.getZoom(),
+            { 'info_format': 'text/html' }
+        );
+
+        // Display the feature info (e.g., in a popup or sidebar)
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(data)
+                    .openOn(map);
+            });
+    });
+
+    // Function to build the WMS GetFeatureInfo URL
+    function getFeatureInfoUrl(map, layer, latlng, zoom, params) {
+        var point = map.latLngToContainerPoint(latlng, zoom),
+            size = map.getSize(),
+            bounds = map.getBounds(),
+            sw = bounds.getSouthWest(),
+            ne = bounds.getNorthEast();
+
+        var defaultParams = {
+            request: 'GetFeatureInfo',
+            service: 'WMS',
+            srs: 'EPSG:4326',
+            styles: layer.wmsParams.styles,
+            transparent: layer.wmsParams.transparent,
+            version: layer.wmsParams.version,
+            format: layer.wmsParams.format,
+            bbox: [sw.lng, sw.lat, ne.lng, ne.lat].join(','),
+            height: size.y,
+            width: size.x,
+            layers: layer.wmsParams.layers,
+            query_layers: layer.wmsParams.layers,
+            info_format: 'text/html'
+        };
+
+        params = L.Util.extend(defaultParams, params);
+
+        return layer._url + L.Util.getParamString(params, layer._url, true);
+    }
+</script>
+
+</body>
+</html>

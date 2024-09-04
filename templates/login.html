@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+    {% block title %}
+      login
+    {% endblock %}
+    <style>
+      .login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .signup-link {
+        margin-top: 20px;
+      }
+    </style>
+ 
+    {% block body %}
+    <div class="login-container">
+        <h2 class="text-center mb-4">Login</h2>
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter your email" required />
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Enter your password" required />
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="rememberMe" />
+            <label class="form-check-label" for="rememberMe">Remember me</label>
+          </div>
+          <button id="actionButton" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div class="text-center mt-3">
+          <a href="#">Forgot your password?</a>
+        </div>
+        <!-- Sign Up Link -->
+        <div class="signup-link text-center">
+          <p>Don't have an account?</p>
+          <a href="/signup" class="btn btn-secondary w-100">Sign Up</a>
+        </div>
+      </div>
+    {% endblock %}
+
