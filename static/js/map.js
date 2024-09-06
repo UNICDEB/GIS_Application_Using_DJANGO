@@ -128,7 +128,7 @@ require([
     var view = new MapView({
         container: "map",  // Reference to the map container in the HTML
         map: map,          // Reference to the map object created before the view
-        center: [0, 0],    // Initial center point (longitude, latitude)
+        center: [0 , 0],    // Initial center point (longitude, latitude)
         zoom: 2            // Initial zoom level
     });
 
@@ -220,6 +220,7 @@ require([
                         <b>Longitude:</b> ${lng}<br>
                         <b>Temperature:</b> ${weather.temperature} °C<br>
                         <b>Humidity:</b> ${weather.humidity} %<br>
+                        <b>AQI Value:</b> ${weather.aqi} (Air Quality Index) <br>
                         <b>AQI:</b> ${getAQIDescription(weather.aqi)}
                     `
                 }
@@ -280,4 +281,3 @@ require([
         return "Unknown";
     }
 });
-
