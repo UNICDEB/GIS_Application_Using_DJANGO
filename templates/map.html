@@ -53,10 +53,14 @@
         box-sizing: border-box;
         border-radius: 6px;
       }
+      #clear-button {
+        margin-top: 10px;
+        background-color: #f44336;
+      }
       #map {
-        height: 550px; /* Height of the map container */
-        width: 1700px; /* Width of the map container */
-        max-width: 100%; /* Ensure it doesn’t exceed the width of the parent container */
+        height: 550px;
+        width: 1700px;
+        max-width: 100%;
         border: 1px solid #ccc;
       }
     </style>
@@ -82,7 +86,8 @@
       <label for="longitude">Longitude:</label>
       <input type="text" id="longitude" placeholder="Enter longitude" />
 
-      <button onclick="updateMap()">Submit</button>
+      <button onclick="addMarker()">Add Marker</button>
+      <button id="clear-button" onclick="clearMarkers()">Clear All Markers</button>
     </div>
 
     <div id="map"></div>

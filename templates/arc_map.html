@@ -66,108 +66,41 @@
 </body>
 </html> -->
 
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoServer WMS with Leaflet - Full Characteristics</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-    // Initialize the map
-    var map = L.map('map').setView([51.505, -0.09], 5);  // Default center and zoom level
-
-    // Add a base layer (optional)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Add GeoServer WMS layer with additional characteristics
-    var geoServerWMS = L.tileLayer.wms('http://localhost:8080/geoserver/wms', {
-        layers: 'workspace:layer_name',  // Replace with your workspace and layer name
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',  // Specify WMS version
-        tiled: true,  // Enable tiling for better performance
-        attribution: '© GeoServer',
-        styles: 'default',  // Apply the default style or specify your custom style
-        bboxSR: 4326,  // Specify the spatial reference system for bounding boxes
-        crs: L.CRS.EPSG4326,  // Coordinate Reference System (CRS)
-        detectRetina: true,  // Use retina tiles if available
-        zIndex: 100  // Control stacking order of the layers
-    }).addTo(map);
-
-    // Optionally, add multiple WMS layers with different characteristics
-    var anotherWMSLayer = L.tileLayer.wms('http://localhost:8080/geoserver/wms', {
-        layers: 'workspace:another_layer',  // Replace with another layer name
-        format: 'image/png',
-        transparent: true,
-        version: '1.1.1',
-        styles: 'another_style',  // Use another custom style
-        zIndex: 200  // Higher z-index to place above other layers
-    }).addTo(map);
-
-    // Add a WMS GetFeatureInfo request to display information about map features
-    map.on('click', function(e) {
-        var url = getFeatureInfoUrl(
-            map, geoServerWMS, e.latlng, map.getZoom(),
-            { 'info_format': 'text/html' }
-        );
-
-        // Display the feature info (e.g., in a popup or sidebar)
-        fetch(url)
-            .then(response => response.text())
-            .then(data => {
-                L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(data)
-                    .openOn(map);
-            });
-    });
-
-    // Function to build the WMS GetFeatureInfo URL
-    function getFeatureInfoUrl(map, layer, latlng, zoom, params) {
-        var point = map.latLngToContainerPoint(latlng, zoom),
-            size = map.getSize(),
-            bounds = map.getBounds(),
-            sw = bounds.getSouthWest(),
-            ne = bounds.getNorthEast();
-
-        var defaultParams = {
-            request: 'GetFeatureInfo',
-            service: 'WMS',
-            srs: 'EPSG:4326',
-            styles: layer.wmsParams.styles,
-            transparent: layer.wmsParams.transparent,
-            version: layer.wmsParams.version,
-            format: layer.wmsParams.format,
-            bbox: [sw.lng, sw.lat, ne.lng, ne.lat].join(','),
-            height: size.y,
-            width: size.x,
-            layers: layer.wmsParams.layers,
-            query_layers: layer.wmsParams.layers,
-            info_format: 'text/html'
-        };
-
-        params = L.Util.extend(defaultParams, params);
-
-        return layer._url + L.Util.getParamString(params, layer._url, true);
-    }
-</script>
-
-</body>
+<html>
+  <head>
+    <title>Tiled WMS</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script>
+      var layers = [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()
+        }),
+        new ol.layer.Tile({
+          extent: [-13884991, 2870341, -7455066, 6338219],
+          source: new ol.source.TileWMS({
+            url: 'https://ahocevar.com/geoserver/wms',
+            params: {'LAYERS': 'topp:states', 'TILED': true},
+            serverType: 'geoserver',
+            // Countries have transparency, so do not fade tiles:
+            transition: 0
+          })
+        })
+      ];
+      var map = new ol.Map({
+        layers: layers,
+        target: 'map',
+        view: new ol.View({
+          center: [-10997148, 4569099],
+          zoom: 4
+        })
+      });
+    </script>
+  </body>
 </html>

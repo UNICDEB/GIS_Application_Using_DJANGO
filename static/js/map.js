@@ -18,16 +18,16 @@ require([
         zoom: 2            // Initial zoom level
     });
 
-    // Initialize a graphic variable to hold the marker
-    var markerGraphic;
+    // Array to hold multiple markers
+    var markerGraphics = [];
 
     // Event listener for the dropdown menu to change the basemap
     document.getElementById('basemap-selector').addEventListener('change', function() {
         map.basemap = this.value;
     });
 
-    // Function to update the map and place the marker
-    window.updateMap = function() {
+    // Function to add a marker
+    window.addMarker = function() {
         // Get latitude and longitude values from input fields
         var lat = parseFloat(document.getElementById('latitude').value);
         var lng = parseFloat(document.getElementById('longitude').value);
@@ -36,11 +36,6 @@ require([
         if (isNaN(lat) || isNaN(lng)) {
             alert("Please enter valid latitude and longitude values.");
             return;
-        }
-
-        // Remove the existing marker if it exists
-        if (markerGraphic) {
-            view.graphics.remove(markerGraphic);
         }
 
         // Create a point geometry for the marker
@@ -60,7 +55,7 @@ require([
         });
 
         // Create a graphic and add the geometry and symbol to it
-        markerGraphic = new Graphic({
+        var markerGraphic = new Graphic({
             geometry: point,
             symbol: markerSymbol,
             popupTemplate: {  // Popup template to show latitude and longitude
@@ -72,10 +67,22 @@ require([
         // Add the graphic (marker) to the map view
         view.graphics.add(markerGraphic);
 
+        // Push marker to the array for later reference
+        markerGraphics.push(markerGraphic);
+
         // Automatically adjust the map view to focus on the marker
         view.goTo({
             center: [lng, lat],
             zoom: 15
         });
+    };
+
+    // Function to clear all markers
+    window.clearMarkers = function() {
+        // Remove all marker graphics from the map
+        view.graphics.removeAll();
+
+        // Clear the marker array
+        markerGraphics = [];
     };
 });
