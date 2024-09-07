@@ -10,5 +10,6 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('map/', views.map_view, name = 'map'),
     path('arcmap/', views.arc_map_view, name='Arc Map'),
-    path('contactus/', views.contact_us, name='contact_us')
+    path('contactus/', views.contact_us, name='contact_us'),
+    path('goamap/', views.goamap, name='goamap')
 ]
