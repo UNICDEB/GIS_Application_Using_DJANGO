@@ -5,8 +5,11 @@ require([
     "esri/symbols/SimpleMarkerSymbol",
     "esri/geometry/Extent",
     "esri/geometry/Polygon",
-    "esri/symbols/SimpleFillSymbol"
-], function(Map, MapView, Graphic, SimpleMarkerSymbol, Extent, Polygon, SimpleFillSymbol) {
+    "esri/symbols/SimpleFillSymbol",
+    "esri/layers/GraphicsLayer"
+], function(Map, MapView, Graphic, SimpleMarkerSymbol, Extent, Polygon, SimpleFillSymbol, GraphicsLayer) {
+
+    const API_KEY = "91502d22ace3c1955e82ffa64da42e60";  // Replace with your actual API key from OpenWeather or similar
 
     // Initialize the map with the default basemap
     var map = new Map({
@@ -17,207 +20,204 @@ require([
     var view = new MapView({
         container: "map",  // Reference to the map container in the HTML
         map: map,          // Reference to the map object created before the view
-        center: [0, 0],    // Initial center point (longitude, latitude)
-        zoom: 2            // Initial zoom level
+        center: [73.8567, 15.2993],    // Center on Goa
+        zoom: 10            // Initial zoom level for Goa
     });
 
-    // Array to hold multiple markers and their locations
-    var markerGraphics = [];
-    var locations = [];
+    // Graphics Layer for AQI-based polygons
+    var aqiLayer = new GraphicsLayer();
+    map.add(aqiLayer);
 
-    // OpenWeatherMap API Key (Replace with your actual key)
-    var apiKey = '91502d22ace3c1955e82ffa64da42e60';
+    // Hardcoded Goa locations
+    var goaLocations = [
+        {lat: 15.2993, lng: 73.8567, name: 'Panaji'},
+        {lat: 15.2719, lng: 73.9860, name: 'Vasco da Gama'},
+        {lat: 15.3959, lng: 73.8127, name: 'Mapusa'},
+        {lat: 15.5520, lng: 73.7512, name: 'Pernem'},
+        {lat: 15.5015, lng: 73.8241, name: 'Bicholim'},
+        {lat: 15.4137, lng: 74.0080, name: 'Ponda'},
+        {lat: 15.4927, lng: 73.8234, name: 'Margao'}
+    ];
+
+    // Array to hold user-added markers and their locations
+    var userMarkerGraphics = [];
+    var userLocations = [];
+
+    // Array to hold the hardcoded Goa markers
+    var hardcodedMarkers = [];
 
     // Event listener for the dropdown menu to change the basemap
     document.getElementById('basemap-selector').addEventListener('change', function() {
         map.basemap = this.value;
     });
 
-    // Function to fetch weather data (temperature, humidity, AQI)
-    function fetchWeatherData(lat, lng, callback) {
-        var weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${apiKey}`;
-        var aqiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lng}&appid=${apiKey}`;
-
-        // Fetch current weather data (temperature and humidity)
-        fetch(weatherUrl)
-            .then(response => response.json())
-            .then(weatherData => {
-                // Fetch AQI data after weather data
-                fetch(aqiUrl)
-                    .then(response => response.json())
-                    .then(aqiData => {
-                        var temperature = weatherData.main.temp;
-                        var humidity = weatherData.main.humidity;
-                        var aqi = aqiData.list[0].main.aqi;
-
-                        callback({
-                            temperature: temperature,
-                            humidity: humidity,
-                            aqi: aqi
-                        });
-                    });
-            })
-            .catch(error => {
-                console.error('Error fetching weather data:', error);
-                callback(null);
-            });
+    // Function to fetch weather and AQI data
+    async function fetchWeatherAQI(lat, lng) {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${API_KEY}`);
+        const data = await response.json();
+        return {
+            temp: data.main.temp - 273.15, // Convert from Kelvin to Celsius
+            humidity: data.main.humidity,
+            aqi: Math.floor(Math.random() * 500) // Placeholder: replace with actual AQI API call
+        };
     }
 
-    // Function to add a marker
-    window.addMarker = function() {
-        // Get latitude and longitude values from input fields
-        var lat = parseFloat(document.getElementById('latitude').value);
-        var lng = parseFloat(document.getElementById('longitude').value);
-
-        // Validate the inputs
-        if (isNaN(lat) || isNaN(lng)) {
-            alert("Please enter valid latitude and longitude values.");
-            return;
-        }
-
-        // Create a point geometry for the marker
+    // Function to add a hardcoded marker
+    async function addHardcodedMarker(lat, lng, name) {
+        const weatherData = await fetchWeatherAQI(lat, lng);
         var point = {
-            type: "point",       // Autocasts as new Point()
+            type: "point",
             longitude: lng,
             latitude: lat
         };
 
-        // Create a simple marker symbol for the point
         var markerSymbol = new SimpleMarkerSymbol({
-            color: [226, 119, 40],   // Orange color
-            outline: {               // White outline
+            color: [0, 0, 255],  // Blue for hardcoded markers
+            outline: {
                 color: [255, 255, 255],
                 width: 2
             }
         });
 
-        // Fetch weather data before creating the marker
-        fetchWeatherData(lat, lng, function(weather) {
-            if (!weather) {
-                alert('Could not fetch weather data for this location.');
-                return;
+        var markerGraphic = new Graphic({
+            geometry: point,
+            symbol: markerSymbol,
+            popupTemplate: {
+                title: name,
+                content: `
+                    <b>Temperature:</b> ${weatherData.temp.toFixed(1)} °C<br/>
+                    <b>Humidity:</b> ${weatherData.humidity} %<br/>
+                    <b>AQI:</b> ${weatherData.aqi}
+                `
             }
-
-            // Create a graphic and add the geometry, symbol, and popup template to it
-            var markerGraphic = new Graphic({
-                geometry: point,
-                symbol: markerSymbol,
-                popupTemplate: {  // Popup template to show latitude, longitude, and weather data
-                    title: "Location Information",
-                    content: `
-                        <b>Latitude:</b> ${lat}<br>
-                        <b>Longitude:</b> ${lng}<br>
-                        <b>Temperature:</b> ${weather.temperature} °C<br>
-                        <b>Humidity:</b> ${weather.humidity} %<br>
-                        <b>AQI Value:</b> ${weather.aqi} (Air Quality Index) <br>
-                        <b>AQI:</b> ${getAQIDescription(weather.aqi)}
-                    `
-                }
-            });
-
-            // Add the marker graphic to the map view
-            view.graphics.add(markerGraphic);
-
-            // Add AQI color layer (circle)
-            addAQICircle(lat, lng, weather.aqi);
-
-            // Push marker and location to the arrays for later reference
-            markerGraphics.push(markerGraphic);
-            locations.push([lng, lat]);
-
-            // Adjust the map view to show all markers
-            adjustMapToFitMarkers();
         });
-    };
 
-    // Function to add a circular layer to represent AQI coverage
-    function addAQICircle(lat, lng, aqi) {
-        // Determine color based on AQI value
-        var color;
-        if (aqi == 1) color = [0, 255, 0, 0.4];  // Green (Good)
-        else if (aqi == 2) color = [255, 255, 0, 0.4];  // Yellow (Fair)
-        else if (aqi == 3) color = [255, 165, 0, 0.4];  // Orange (Moderate)
-        else if (aqi == 4) color = [255, 69, 0, 0.4];   // Red (Poor)
-        else color = [139, 0, 0, 0.4];   // Dark Red (Very Poor)
+        view.graphics.add(markerGraphic);
+        hardcodedMarkers.push(markerGraphic);
 
-        // Create a circular polygon by defining multiple points along the circumference
-        var radius = 0.05;  // Smaller radius for the circle
-        var points = [];
+        // Add color-coded AQI shading
+        addAqiShading(lat, lng, weatherData.aqi);
+    }
 
-        for (var i = 0; i < 360; i += 10) {
-            var angle = i * Math.PI / 180;
-            var pointLng = lng + (radius * Math.cos(angle));
-            var pointLat = lat + (radius * Math.sin(angle));
-            points.push([pointLng, pointLat]);
+    // Add all hardcoded Goa locations
+    goaLocations.forEach(function(location) {
+        addHardcodedMarker(location.lat, location.lng, location.name);
+    });
+
+    // Function to add color shading based on AQI value
+    function addAqiShading(lat, lng, aqi) {
+        var aqiColor;
+        if (aqi < 50) {
+            aqiColor = [0, 255, 0, 0.4];  // Green for low AQI
+        } else if (aqi < 100) {
+            aqiColor = [255, 255, 0, 0.4]; // Yellow for moderate AQI
+        } else {
+            aqiColor = [255, 0, 0, 0.4];   // Red for high AQI
         }
 
-        // Complete the circle by connecting the last point to the first
-        points.push(points[0]);
-
-        // Define a polygon geometry with the calculated points (circle)
         var polygon = new Polygon({
-            rings: points,
-            spatialReference: { wkid: 4326 }
+            rings: [
+                [lng - 0.02, lat - 0.02],
+                [lng + 0.02, lat - 0.02],
+                [lng + 0.02, lat + 0.02],
+                [lng - 0.02, lat + 0.02]
+            ]
         });
 
-        // Create a simple fill symbol for the circle
-        var fillSymbol = new SimpleFillSymbol({
-            color: color,
+        var polygonSymbol = new SimpleFillSymbol({
+            color: aqiColor,
             outline: {
                 color: [255, 255, 255],
                 width: 1
             }
         });
 
-        // Create a graphic for the polygon (circle) and add it to the map view
-        var circleGraphic = new Graphic({
+        var polygonGraphic = new Graphic({
             geometry: polygon,
-            symbol: fillSymbol
+            symbol: polygonSymbol
         });
 
-        view.graphics.add(circleGraphic);
+        aqiLayer.add(polygonGraphic);
     }
 
-    // Function to adjust the map zoom and extent to fit all markers
-    function adjustMapToFitMarkers() {
-        if (locations.length > 1) {
-            // Calculate the extent (bounding box) based on all marker locations
-            var extent = new Extent({
-                xmin: Math.min(...locations.map(l => l[0])),
-                ymin: Math.min(...locations.map(l => l[1])),
-                xmax: Math.max(...locations.map(l => l[0])),
-                ymax: Math.max(...locations.map(l => l[1])),
-                spatialReference: { wkid: 4326 }  // WGS 84
+    // Add user marker and rearrange view
+    async function addMarker() {
+        var lat = parseFloat(document.getElementById('latitude').value);
+        var lng = parseFloat(document.getElementById('longitude').value);
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            const weatherData = await fetchWeatherAQI(lat, lng);
+            var point = {
+                type: "point",
+                longitude: lng,
+                latitude: lat
+            };
+
+            var markerSymbol = new SimpleMarkerSymbol({
+                color: [255, 0, 0],  // Red for user-added markers
+                outline: {
+                    color: [255, 255, 255],
+                    width: 2
+                }
             });
 
-            // Use the view.goTo() method to zoom and center the map to the extent
-            view.goTo(extent.expand(1.5));  // Expanding the extent slightly for padding
-        } else if (locations.length === 1) {
-            // If there's only one marker, center and zoom on it
-            view.goTo({
-                center: locations[0],
-                zoom: 15
+            var markerGraphic = new Graphic({
+                geometry: point,
+                symbol: markerSymbol,
+                popupTemplate: {
+                    title: "User Added Location",
+                    content: `
+                        <b>Temperature:</b> ${weatherData.temp.toFixed(1)} °C<br/>
+                        <b>Humidity:</b> ${weatherData.humidity} %<br/>
+                        <b>AQI:</b> ${weatherData.aqi}
+                    `
+                }
             });
+
+            view.graphics.add(markerGraphic);
+            userMarkerGraphics.push(markerGraphic);
+            userLocations.push([lng, lat]);
+
+            // Add AQI shading for the user-added marker
+            addAqiShading(lat, lng, weatherData.aqi);
+
+            // Rearrange view to show all markers
+            rearrangeMapView();
+        } else {
+            alert("Please enter valid latitude and longitude!");
         }
     }
 
-    // Function to clear all markers and layers
-    window.clearMarkers = function() {
-        // Remove all marker graphics from the map
-        view.graphics.removeAll();
+    // Rearrange map to fit all hardcoded and user-added markers
+    function rearrangeMapView() {
+        var allLocations = [
+            ...goaLocations.map(loc => [loc.lng, loc.lat]),
+            ...userLocations
+        ];
 
-        // Clear the marker and location arrays
-        markerGraphics = [];
-        locations = [];
-    };
+        if (allLocations.length > 0) {
+            var extent = new Extent({
+                xmin: Math.min(...allLocations.map(loc => loc[0])),
+                ymin: Math.min(...allLocations.map(loc => loc[1])),
+                xmax: Math.max(...allLocations.map(loc => loc[0])),
+                ymax: Math.max(...allLocations.map(loc => loc[1]))
+            });
 
-    // Helper function to convert AQI value to a description
-    function getAQIDescription(aqi) {
-        if (aqi == 1) return "Good";
-        if (aqi == 2) return "Fair";
-        if (aqi == 3) return "Moderate";
-        if (aqi == 4) return "Poor";
-        if (aqi == 5) return "Very Poor";
-        return "Unknown";
+            view.goTo(extent.expand(1.5));  // Slightly expand the extent to fit all markers nicely
+        }
     }
+
+    // Clear all user-added markers
+    function clearUserMarkers() {
+        userMarkerGraphics.forEach(function(graphic) {
+            view.graphics.remove(graphic);
+        });
+        userMarkerGraphics = [];
+        userLocations = [];
+
+        rearrangeMapView();  // Adjust view after clearing user markers
+    }
+
+    // Initial rearrangement to fit all Goa locations
+    rearrangeMapView();
 });
