@@ -606,12 +606,18 @@ require([
 
     function addAqiShading(lat, lng, aqi) {
         var aqiColor;
-        if (aqi < 50) {
-            aqiColor = [0, 255, 0, 0.4]; // Green
-        } else if (aqi < 100) {
-            aqiColor = [255, 255, 0, 0.4]; // Yellow
+        if (aqi <= 50) {
+            aqiColor = [0, 255, 0, 0.4]; // Green - Good
+        } else if (aqi <= 100) {
+            aqiColor = [255, 255, 0, 0.4]; // Yellow - Satisfactory
+        } else if (aqi <= 200) {
+            aqiColor = [250, 209, 4, 0.4]; //Moderate
+        } else if (aqi <= 300) {
+            aqiColor = [255, 178, 0, 0.4]; //Poor
+        } else if (aqi <= 400) {
+            aqiColor = [255, 120, 0, 0.4]; //Very Poor
         } else {
-            aqiColor = [255, 0, 0, 0.4]; // Red
+            aqiColor = [255, 0, 0, 0.4]; // Severe
         }
 
         var polygon = new Polygon({
