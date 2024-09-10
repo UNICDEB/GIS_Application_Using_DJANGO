@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GOA Location Marker with Weather and AQI</title>
+
+    <!-- ArcGIS CSS -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      #menu-bar {
+        margin-bottom: 20px;
+        width: 300px;
+      }
+      #menu-bar select {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      #form-container {
+        width: 300px;
+        margin-bottom: 20px;
+      }
+      #form-container label {
+        display: block;
+        margin-top: 10px;
+      }
+      #form-container input {
+        width: 100%;
+        padding: 5px;
+        margin-top: 5px;
+        box-sizing: border-box;
+      }
+      #form-container button {
+        margin-top: 15px;
+        padding: 10px;
+        width: 100%;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-sizing: border-box;
+        border-radius: 6px;
+      }
+      #clear-button {
+        margin-top: 10px;
+        background-color: #f44336;
+      }
+      #map {
+        height: 700px;
+        width: 1900px;
+        max-width: 100%;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Interactive Goa Location Finder with Weather & AQI</h1>
+
+    <!-- Dropdown Menu for Basemap Selection -->
+    <div id="menu-bar">
+      <select id="basemap-selector">
+        <option value="streets-navigation-vector">Navigation Map</option>
+        <option value="streets">Streets Map</option>
+        <option value="terrain">Terrain with Labels</option>
+        <option value="satellite">Satellite Map</option>
+        <option value="topo">Topographic Map</option>
+      </select>
+    </div>
+
+    <div id="form-container">
+      <label for="latitude">Latitude:</label>
+      <input type="text" id="latitude" placeholder="Enter latitude" />
+
+      <label for="longitude">Longitude:</label>
+      <input type="text" id="longitude" placeholder="Enter longitude" />
+
+      <button onclick="window.addMarker()">Add Marker</button>
+      <button id="clear-button" onclick="clearUserMarkers()">Clear All Markers</button>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- ArcGIS JavaScript -->
+    <script src="https://js.arcgis.com/4.27/"></script>
+
+    <!-- Link to external JavaScript file -->
+    {% load static %}
+    <script src="{% static 'js/goamap.js' %}"></script>
+  </body>
+</html>
