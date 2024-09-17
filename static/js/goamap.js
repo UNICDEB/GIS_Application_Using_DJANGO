@@ -542,12 +542,23 @@ require([
 
     // Hardcoded Goa locations
     var goaLocations = [
-        { lat: 15.2719, lng: 73.9860, name: 'Vasco da Gama' },
-        { lat: 15.3959, lng: 73.8127, name: 'Mapusa' },
-        { lat: 15.5520, lng: 73.7512, name: 'Pernem' },
-        { lat: 15.5015, lng: 73.8241, name: 'Bicholim' },
-        { lat: 15.4137, lng: 74.0080, name: 'Ponda' },
-        { lat: 15.4927, lng: 73.8234, name: 'Margao' }
+        // { lat: 15.2719, lng: 73.9860, name: 'Vasco da Gama' },
+        // { lat: 15.3959, lng: 73.8127, name: 'Mapusa' },
+        // { lat: 15.5520, lng: 73.7512, name: 'Pernem' },
+        // { lat: 15.5015, lng: 73.8241, name: 'Bicholim' },
+        // { lat: 15.4137, lng: 74.0080, name: 'Ponda' },
+        // { lat: 15.4927, lng: 73.8234, name: 'Margao' },
+        { lat: 15.2386, lng: 74.0020, name: 'Permos Stone Center'},
+        { lat: 15.239810158440278, lng: 74.00308013336111, name: 'Jetson Miranda Stone Quality'},
+        { lat: 15.5501108571308, lng: 73.95409283401871, name: 'Parka Engineering'}, 
+        { lat: 15.560328727284805, lng: 73.93197136984165, name: 'Minning Area'},
+        { lat: 15.58571349477737, lng: 73.93841728418904, name: 'Dicholi Minning Area'},
+        {lat: 15.349641642971244, lng: 74.21044989517647, name: 'Sahogaon Minning Area'},
+        {lat: 15.361528997972309, lng: 74.16753455279228, name: 'Sangod Minning Area'},
+        {lat: 15.666628330315278, lng: 73.80368586487762, name: 'Tuye Minning Area'},
+        { lat: 15.644162743215949, lng: 73.74342781317524, name: 'Morjim Minning Area'},
+        
+
     ];
 
     var userMarkerGraphics = [];
