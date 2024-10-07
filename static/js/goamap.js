@@ -541,14 +541,9 @@ require([
     map.add(aqiLayer);
 
     // Hardcoded Goa locations
+    // Hardcoded Goa locations
     var goaLocations = [
-<<<<<<< HEAD
-        // { lat: 15.2719, lng: 73.9860, name: 'Vasco da Gama' },
-        // { lat: 15.3959, lng: 73.8127, name: 'Mapusa' },
-        // { lat: 15.5520, lng: 73.7512, name: 'Pernem' },
-        // { lat: 15.5015, lng: 73.8241, name: 'Bicholim' },
-        // { lat: 15.4137, lng: 74.0080, name: 'Ponda' },
-        // { lat: 15.4927, lng: 73.8234, name: 'Margao' },
+
         { lat: 15.2386, lng: 74.0020, name: 'Permos Stone Center'},
         { lat: 15.239810158440278, lng: 74.00308013336111, name: 'Jetson Miranda Stone Quality'},
         { lat: 15.5501108571308, lng: 73.95409283401871, name: 'Parka Engineering'}, 
@@ -559,15 +554,6 @@ require([
         {lat: 15.666628330315278, lng: 73.80368586487762, name: 'Tuye Minning Area'},
         { lat: 15.644162743215949, lng: 73.74342781317524, name: 'Morjim Minning Area'},
         
-
-=======
-        { lat: 15.2719, lng: 73.9860, name: 'Vasco da Gama' },
-        { lat: 15.3959, lng: 73.8127, name: 'Mapusa' },
-        { lat: 15.5520, lng: 73.7512, name: 'Pernem' },
-        { lat: 15.5015, lng: 73.8241, name: 'Bicholim' },
-        { lat: 15.4137, lng: 74.0080, name: 'Ponda' },
-        { lat: 15.4927, lng: 73.8234, name: 'Margao' }
->>>>>>> d82e6cde7aab1f084550b220cf699bd43c4229fa
     ];
 
     var userMarkerGraphics = [];

@@ -459,4 +459,6 @@ require([
         if (aqi == 5) return "Very Poor";
         return "Unknown";
     }
+
+    
 });
